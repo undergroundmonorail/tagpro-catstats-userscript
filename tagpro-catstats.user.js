@@ -29,7 +29,7 @@
 
   var scripts = [
     "//cdn.jsdelivr.net/filesaver.js/0.2/FileSaver.min.js",
-    "https://dl.dropboxusercontent.com/u/99315565/tagpro-catstats-userscript/1.0/catstats.js",
+    "https://rawgit.com/prshreshtha/tagpro-catstats-userscript/v1.0/tagpro-catstats.user.js",
   ];
   scripts.forEach(injectScript);
 
