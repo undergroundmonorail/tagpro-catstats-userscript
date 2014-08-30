@@ -323,12 +323,13 @@ catstats = (function(catstats) {
    * Create the document and trigger a download
    */
   catstats.exportStats = function exportStats() {
+    var teams = tagpro.teamNames ? tagpro.teamNames.redTeamName + "-vs-" + tagpro.teamNames.blueTeamName + "-" : "";
     saveAs(
       new Blob(
               [this.tsv(this.prepareStats())],
               {type: "data:text/tsv;charset=utf-8"}
       ),
-      "tagpro-"+Date.now()+".tsv"
+      "tagpro-"+teams+Date.now()+".tsv"
     );
     this.downloaded = true;
   }
