@@ -1,0 +1,1 @@
+Install Tampermonkey or Greasemonkey. Open the userscript. Enjoy.
