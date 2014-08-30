@@ -1,5 +1,29 @@
 catstats = (function(catstats) {
 
+  var readCookie = function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+  }
+
+  var writeCookie = function writeCookie(cookie) {
+    var cookieExpirationDate = new Date();
+    cookieExpirationDate.setYear(cookieExpirationDate.getYear() + 1);
+    cookieExpirationDate = cookieExpirationDate.toGMTString();
+
+    var cookieDomain = (function() {
+      var s = document.domain.toString();
+      return s.substring(s.indexOf("."));
+    })();
+
+    document.cookie = cookie.toString() + ";" + "domain=" + cookieDomain + ";" + "expires=" + cookieExpirationDate;
+  }
+
   catstats.downloaded = false;
   catstats.stats = null;
   catstats.players = {};
@@ -24,28 +48,36 @@ catstats = (function(catstats) {
 
   var tsvCookieName = "save_as_tsv_status";
   var linkId = "saveAsTSVLink";
-  var cookieDomain = (function() {
-    var s = document.domain.toString();
-    return s.substring(s.indexOf("."));
-  })();
-
 
   var tsvSavePrompt = "Save as .tsv";
-  var tsvGonnaSave = "Scoreboard will be saved when game ends!";
-  /**
-   * Add download link and listen to socket updates
-   */
+
   catstats.setup = function setup() {
-    // Create a download link on the scoreboard
     var _this = this;
 
     $(document).ready(function() {
-      var $el = $('#options').find('table');
-      var $export = $('<a>', {href: '#', id: linkId})
-        .text(tsvSavePrompt)
+      var currentStatusString = readCookie(tsvCookieName);
+      var currentStatus;
+
+      if (currentStatusString == null) {
+        currentStatus = false;
+      } else {
+        currentStatusString = currentStatusString.toLowerCase();
+        currentStatus = (currentStatusString === "true");
+      }
+
+      catstats.wantsStats = currentStatus;
+
+      var $checkbox = $("<input>", { type: "checkbox", id: linkId, checked: currentStatus })
+        .css("cursor", "pointer")
         .click(function() { _this.registerExport.call(_this); });
-      $export.insertAfter($el);
-    });    
+
+      var $label = $('<label />').html(tsvSavePrompt)
+        .css("cursor", "pointer");
+      $label.prepend($checkbox);
+
+      var $el = $('#options').find('table');
+      $label.insertAfter($el);
+    });
 
     // Listen for player updates
     tagpro.socket.on('p', function(data) { _this.onPlayerUpdate.call(_this, data); });
@@ -189,17 +221,11 @@ catstats = (function(catstats) {
    * will be saved before leaving the page
    */
   catstats.registerExport = function registerExport() {
-    this.wantsStats = true;
-
-    // game has ended - download now
-    if(tagpro.state == 2)
+    this.wantsStats = $("#" + linkId).is(":checked") ? true : false;
+    writeCookie(tsvCookieName + "=" + this.wantsStats);
+    if (this.wantsStats && tagpro.state == 2) {
       this.exportStats();
-
-    // Update the tsv link
-    $('#' + linkId)
-      .off()
-      .text(tsvGonnaSave)
-      .css('cursor', 'default');
+    }
   };
 
   /**
@@ -297,7 +323,6 @@ catstats = (function(catstats) {
    * Create the document and trigger a download
    */
   catstats.exportStats = function exportStats() {
-    console.log("Exporting Stats");
     saveAs(
       new Blob(
               [this.tsv(this.prepareStats())],
