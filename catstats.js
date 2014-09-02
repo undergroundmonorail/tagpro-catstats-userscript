@@ -137,7 +137,7 @@ catstats = (function(catstats) {
   catstats.onPlayerLeftUpdate = function onPlayerLeftUpdate(playerId) {
     // Player leaves mid-game
     if(tagpro.state == 1) {
-      this.updatePlayerAfterDeparture(players[playerId]);
+      this.updatePlayerAfterDeparture(this.players[playerId]);
     }
 
     // Player leaves before the game
