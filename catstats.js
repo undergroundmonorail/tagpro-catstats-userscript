@@ -25,7 +25,6 @@ catstats = (function(catstats) {
   }
 
   catstats.downloaded = false;
-  catstats.stats = null;
   catstats.players = {};
   catstats.score = {redTeam: 0, blueTeam: 0};
   catstats.columns = ['name', 'plusminus', 'minutes', 'score', 'tags', 'pops',
@@ -112,10 +111,13 @@ catstats = (function(catstats) {
     data.forEach(function(playerUpdate) {
       var player = _this.players[playerUpdate.id];
 
-      if(!player)
+      if (!player) {
         player = _this.createPlayer(playerUpdate.id);
-
-      _this.updatePlayer(player, playerUpdate);
+        _this.updatePlayer(player, tagpro.players[playerUpdate.id]);
+      } else {
+        _this.updatePlayer(player, playerUpdate);
+      }
+      
     });
   };
 
@@ -265,8 +267,9 @@ catstats = (function(catstats) {
       }
 
       // update the local player record with new data
-      if(typeof data !== 'object')
-        player[attr] = data;
+      if(typeof data !== 'object') {
+          player[attr] = data;
+      }
     });
   };
 
@@ -350,7 +353,10 @@ catstats = (function(catstats) {
         result = _this.columns.join('\t') + '\r\n';
 
       // write row
-      result += _this.columns.map(function(c) { return player[c]; }).join('\t') + '\r\n';
+      result += _this.columns.map(function(c) {
+          return player[c];
+        }).join('\t') + '\r\n';
+
     });
 
     return result;
