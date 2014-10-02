@@ -234,7 +234,13 @@ catstats = (function(catstats) {
   catstats.registerExport = function registerExport() {
     this.wantsStats = $("#" + linkId).is(":checked") ? true : false;
     writeCookie(tsvCookieName + "=" + this.wantsStats);
-    if (this.wantsStats && tagpro.state == 2) {
+    
+    console.log(tagpro.players);
+    console.log(this.team);
+    console.log(tagpro.players.concat(this.team))
+    console.log(catstats.removeDuplicates(tagpro.players.concat(this.team)))
+    
+    if (tagpro.state == 2) {
       this.exportStats();
     }
   };
@@ -335,6 +341,9 @@ catstats = (function(catstats) {
    * Create the document and trigger a download
    */
   catstats.exportStats = function exportStats() {
+    
+    var teamGame = tagpro.players.concat(this.team).length - 4 >= this.removeDuplicates(tagpro.players.concat(this.team)).length
+    
     var teams = tagpro.teamNames ? tagpro.teamNames.redTeamName + "-vs-" + tagpro.teamNames.blueTeamName + "-" : "";
     saveAs(
       new Blob(
