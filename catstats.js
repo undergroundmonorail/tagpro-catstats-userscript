@@ -1,4 +1,13 @@
 catstats = (function(catstats) {
+  
+  var team = ["a","b","c","d","e"];
+  
+  var removeDuplicates = function(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+  }
 
   var readCookie = function readCookie(name) {
     var nameEQ = name + "=";
